@@ -15,11 +15,15 @@ fun Context.getBatteryPercentage(): Int? {
 	return this.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))?.getBatteryPercentage()
 }
 
+
+fun Context.notifyManager() = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+fun Context.connectService() = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
 /**
  * Возвращает true если есть активное интернет соединение
  */
 fun Context.hasConnect(): Boolean {
-	return (this.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager).activeNetworkInfo?.isConnected == true
+	return this.connectService().activeNetworkInfo?.isConnected == true
 }
 
 /**
@@ -41,3 +45,20 @@ fun Intent.getBatteryPercentage(): Int? {
  * Возвращает true, если у устройства есть вспышка/фонарик
  */
 fun Context.hasTorch() = this.packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)
+
+/**
+* Возвращает true, если разрешение получен
+*/
+fun Context.checkPermission(permission: String): Boolean {
+	return (ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED)
+}
+
+/**
+* Возвращает билдер в зависимости от оси девайса
+*/
+fun Context.notifyBuilder(channelId: String): Notification.Builder {
+	return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+		Notification.Builder(this, channelId)
+	else
+		Notification.Builder(this)
+}
